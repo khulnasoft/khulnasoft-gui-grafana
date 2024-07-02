@@ -1,0 +1,23 @@
+{
+  "name": "khulnasoft-gui-grafana",
+  "version": "6.3.9",
+  "private": true,
+  "scripts": {
+    "install:tracing": "cd khulnasoft-apptracing-panel && yarn",
+    "install:querier": "cd khulnasoft-querier-datasource && yarn",
+    "install:topo": "cd khulnasoft-topo-panel && yarn",
+    "install:all": "yarn install:tracing && yarn install:querier && yarn install:topo",
+    "build:tracing": "cd khulnasoft-apptracing-panel && yarn build",
+    "build:querier": "cd khulnasoft-querier-datasource && yarn build",
+    "build:topo": "cd khulnasoft-topo-panel && yarn build",
+    "build:all": "yarn build:tracing && yarn build:querier && yarn build:topo",
+    "sign:tracing": "cd khulnasoft-apptracing-panel && yarn sign",
+    "sign:querier": "cd khulnasoft-querier-datasource && yarn sign",
+    "sign:topo": "cd khulnasoft-topo-panel && yarn sign",
+    "sign:all": "yarn sign:tracing && yarn sign:querier && yarn sign:topo"
+  },
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "copy-text-to-clipboard": "^3.2.0"
+  }
+}
