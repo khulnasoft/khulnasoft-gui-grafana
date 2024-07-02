@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "panel",
+  "name": "KhulnaSoft Tracing",
+  "id": "khulnasoft-tracing-panel",
+  "info": {
+    "description": "",
+    "author": {
+      "name": "KhulnaSoft",
+      "url": "https://khulnasoft.io/community.html"
+    },
+    "keywords": [
+      "KhulnaSoft",
+      "KhulnaSoft Tracing Panel"
+    ],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "KhulnaSoft",
+        "url": "https://khulnasoft.io/community.html"
+      }
+    ],
+    "screenshots": [
+      {
+        "name": "screenshot",
+        "path": "img/screenshot.jpg"
+      },
+      {
+        "name": "screenshot-tooltip",
+        "path": "img/screenshot-tooltip.jpg"
+      }
+    ],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaDependency": ">=9.0.0",
+    "plugins": []
+  }
+}

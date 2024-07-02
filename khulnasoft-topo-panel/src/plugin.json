@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "panel",
+  "name": "KhulnaSoft Topo",
+  "id": "khulnasoft-topo-panel",
+  "info": {
+    "description": "",
+    "author": {
+      "name": "KhulnaSoft",
+      "url": "https://khulnasoft.io/community.html"
+    },
+    "keywords": [
+      "KhulnaSoft",
+      "KhulnaSoft Topo Panel"
+    ],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "KhulnaSoft",
+        "url": "https://khulnasoft.io/community.html"
+      }
+    ],
+    "screenshots": [
+      {
+        "name": "screenshot-simple-topo",
+        "path": "img/screenshot-simple-topo.jpg"
+      },
+      {
+        "name": "screenshot-tree-topo",
+        "path": "img/screenshot-tree-topo.jpg"
+      },
+      {
+        "name": "screenshot-tree-topo-with-group",
+        "path": "img/screenshot-tree-topo-with-group.jpg"
+      }
+    ],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaDependency": ">=9.0.0",
+    "plugins": []
+  }
+}

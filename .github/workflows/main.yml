@@ -1,0 +1,221 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches:
+      - main
+      - v6.[1-9]
+      - v7.[1-9]
+      - 'feature-**'
+      - latest
+      - backend-plugin
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Why trigger?"
+        required: true
+        type: string
+
+env:
+  IMAGE: "khulnasoft-init-grafana"
+  GRAFANA_API_KEY: ${{ secrets.GRAFANA_API_KEY }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set Env
+        run: |
+          echo "IMAGE_TAG_PREFIX=${{ github.ref_name }}"|sed 's|main|latest|' >> $GITHUB_ENV
+          echo "IMAGE_TAG=$(git rev-list --count HEAD)" >> $GITHUB_ENV
+
+      - name: Setup Yarn
+        uses: DerYeger/yarn-setup-action@master
+        with:
+          node-version: 18
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.0
+
+      - name: Checkout Khulnasoft Dashboards
+        uses: actions/checkout@v3
+        with:
+          repository: khulnasoft/khulnasoft-dashboards
+          path: './khulnasoft-dashboards'
+
+      - name: Copy Dashboards To Datasource
+        run: mkdir ./khulnasoft-querier-datasource/src/dashboards && cp -r ./khulnasoft-dashboards/dashboards/* ./khulnasoft-querier-datasource/src/dashboards
+
+      - name: Update plugin.json
+        run: node ./khulnasoft-querier-datasource/src/update-dashboards.js
+
+      - name: Review plugin.json
+        run: cat ./khulnasoft-querier-datasource/src/plugin.json
+
+      - name: Install All Dependencies
+        run: 'test -d khulnasoft-apptracing-panel/dist  || yarn install:all'
+
+      - name: Update Version
+        run: |
+          files=(package.json */package.json)
+          version=${{ env.IMAGE_TAG_PREFIX }}
+          version=${version#v}
+          for file in "${files[@]}"; do
+            sed -i "s/\"version\": \".*\"/\"version\": \"$version\"/" $file
+          done
+
+      - name: Build All Plugins
+        run: 'test -d khulnasoft-apptracing-panel/dist  || yarn build:all'
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: khulnasoft-querier-datasource/go.mod
+          check-latest: true
+
+      - name: Install Go Mage
+        run: |
+          cd ./khulnasoft-querier-datasource
+          go env
+          go install -mod=mod github.com/magefile/mage
+          whereis mage
+
+      - name: Build Backend Plugin
+        run: |
+          cd ./khulnasoft-querier-datasource
+          mage -v
+
+      # - name: Sign All plugins
+      #   run: yarn sign:all
+      #   if: ${{ env.GRAFANA_API_KEY != '' }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          install: true
+
+      - uses: robinraju/release-downloader@v1.4
+        with:
+          repository: "grafana/clickhouse-datasource"
+          tag: "v2.2.1"
+          fileName: "grafana-clickhouse-datasource-2.2.1.linux_arm64.zip"
+
+      - uses: robinraju/release-downloader@v1.4
+        with:
+          repository: "grafana/clickhouse-datasource"
+          tag: "v2.2.1"
+          fileName: "grafana-clickhouse-datasource-2.2.1.linux_amd64.zip"
+
+      - name: Unzip grafana-clickhouse-datasource
+        run: |
+          unzip -d plugin-amd64 grafana-clickhouse-datasource-2.2.1.linux_amd64.zip
+          unzip -d plugin-arm64 grafana-clickhouse-datasource-2.2.1.linux_arm64.zip
+
+      - name: Log In To GitHub Docker Registry
+        uses: docker/login-action@v2
+        with:
+          registry: "ghcr.io"
+          username: "${{ github.repository_owner }}"
+          password: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Log In To Docker Registry
+        uses: docker/login-action@v2
+        with:
+          username: "khulnasoft"
+          password: "${{ secrets.REGISTRY_PASS }}"
+
+      - name: Build And Push khulnasoft-init-grafana Images
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            "ghcr.io/${{ github.repository_owner }}/khulnasoft-ce/${{ env.IMAGE }}:${{ env.IMAGE_TAG_PREFIX }}-${{ env.IMAGE_TAG }}"
+            "ghcr.io/${{ github.repository_owner }}/khulnasoft-ce/${{ env.IMAGE }}:${{ env.IMAGE_TAG_PREFIX }}"
+            "khulnasoft/${{ env.IMAGE }}:${{ env.IMAGE_TAG_PREFIX }}"
+
+      - name: Build And Push khulnasoft-init-grafana Images to ALIYUN HongKong
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            "ghcr.io/khulnasoft-ce/${{ env.IMAGE }}:${{ env.IMAGE_TAG_PREFIX }}-${{ env.IMAGE_TAG }}"
+            "ghcr.io/khulnasoft-ce/${{ env.IMAGE }}:${{ env.IMAGE_TAG_PREFIX }}"
+
+      - name: Log In To ALIYUN Docker Registry
+        uses: docker/login-action@v2
+        with:
+          registry: "ghcr.io"
+          username: "${{ secrets.REGISTRY_ALIYUN_USER }}"
+          password: "${{ secrets.REGISTRY_PASS }}"
+
+      - name: Build And Push khulnasoft-init-grafana Images To ALIYUN BeiJing
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            "ghcr.io/khulnasoft-ce/${{ env.IMAGE }}:${{ env.IMAGE_TAG_PREFIX }}-${{ env.IMAGE_TAG }}"
+            "ghcr.io/khulnasoft-ce/${{ env.IMAGE }}:${{ env.IMAGE_TAG_PREFIX }}"
+
+      - name: Build tar.gz
+        run: |
+          mkdir release
+          mv khulnasoft-apptracing-panel/dist release/khulnasoft-apptracing-panel
+          mv khulnasoft-querier-datasource/dist release/khulnasoft-querier-datasource
+          mv khulnasoft-topo-panel/dist release/khulnasoft-topo-panel
+          cd release
+          tar -zcvf khulnasoft-gui-grafana.tar.gz *
+          mv khulnasoft-apptracing-panel khulnasoft-tracing-panel
+          zip khulnasoft-tracing-panel-${{ env.IMAGE_TAG_PREFIX }}.zip ./khulnasoft-tracing-panel -r
+          md5sum khulnasoft-tracing-panel-${{ env.IMAGE_TAG_PREFIX }}.zip > khulnasoft-tracing-panel-${{ env.IMAGE_TAG_PREFIX }}.zip.md5
+          rm -r ./khulnasoft-tracing-panel
+          mv khulnasoft-querier-datasource khulnasoft-khulnasoft-datasource
+          zip khulnasoft-khulnasoft-datasource-${{ env.IMAGE_TAG_PREFIX }}.zip ./khulnasoft-khulnasoft-datasource -r
+          md5sum khulnasoft-khulnasoft-datasource-${{ env.IMAGE_TAG_PREFIX }}.zip > khulnasoft-khulnasoft-datasource-${{ env.IMAGE_TAG_PREFIX }}.zip.md5
+          rm -r ./khulnasoft-khulnasoft-datasource
+          mv khulnasoft-topo-panel khulnasoft-topo-panel
+          zip khulnasoft-topo-panel-${{ env.IMAGE_TAG_PREFIX }}.zip ./khulnasoft-topo-panel -r
+          md5sum khulnasoft-topo-panel-${{ env.IMAGE_TAG_PREFIX }}.zip > khulnasoft-topo-panel-${{ env.IMAGE_TAG_PREFIX }}.zip.md5
+          rm -r ./khulnasoft-topo-panel
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Plugin Artifacts
+        run: |
+          cd release
+          ossutil cp -rf khulnasoft-gui-grafana.tar.gz oss://khulnasoft-ce/pkg/grafana-plugin/${{ env.IMAGE_TAG_PREFIX }}/khulnasoft-gui-grafana.tar.gz
+
+      - name: Upload Stable Artifacts
+        if: "startsWith(github.ref, 'refs/tags/')"
+        run: |
+          cd release
+          ossutil cp -rf khulnasoft-gui-grafana.tar.gz oss://khulnasoft-ce/pkg/grafana-plugin/stable/khulnasoft-gui-grafana.tar.gz
