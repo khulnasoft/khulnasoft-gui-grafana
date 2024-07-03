@@ -1,0 +1,3 @@
+import { d3Selection, d3Transition, Point, RectShape } from "../../../types";
+export declare const drawRect: (container: d3Selection, point: Point, rect: RectShape, transition?: d3Transition | null, transitionFunc?: (container: d3Selection, rect: RectShape, point: Point) => (t: d3Transition) => d3Transition) => import("d3-selection").Selection<import("d3-selection").BaseType, any, import("d3-selection").BaseType, any>;
+export declare const defaultRectTransition: (g: d3Selection, rect: RectShape, point: Point) => (t: d3Transition) => import("d3-transition").Transition<import("d3-selection").BaseType, any, import("d3-selection").BaseType, any>;

@@ -1,0 +1,51 @@
+{
+  "name": "khulnasoft-vis-js",
+  "version": "0.0.15",
+  "description": "",
+  "type": "module",
+  "main": "dist/main.mjs",
+  "module": "dist/main.mjs",
+  "typings": "dist/types",
+  "files": [
+    "dist/*.js",
+    "README.md",
+    "dist/types"
+  ],
+  "scripts": {
+    "serve": "npx webpack serve --config ./webpack.serve.config.js",
+    "build": "npx ttsc --emitDeclarationOnly --outDir types && npx webpack build --config ./webpack.build.config.js",
+    "build:types": "npx ttsc --emitDeclarationOnly --outDir types"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:khulnasoft-lab/khulnasoft-vis-js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "d3": "^7.4.4",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.0",
+    "@types/lodash": "^4.14.182",
+    "axios": "^0.27.2",
+    "babel-loader": "^8.2.5",
+    "copy-webpack-plugin": "^11.0.0",
+    "declaration-bundler-webpack-plugin": "^1.0.3",
+    "dts-bundle": "^0.7.3",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "ts-loader": "^9.3.0",
+    "tsconfig-paths-webpack-plugin": "^3.5.2",
+    "ttypescript": "^1.5.15",
+    "types-webpack-bundler": "^1.0.2",
+    "typescript": "^4.6.4",
+    "typescript-declaration-webpack-plugin": "^0.2.2",
+    "typescript-transform-paths": "^3.4.4",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.92.1",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.9.0"
+  }
+}

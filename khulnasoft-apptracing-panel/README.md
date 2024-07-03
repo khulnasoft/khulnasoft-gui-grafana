@@ -2,7 +2,7 @@
 
 The KhulnaSoft Tracing Panel visualizes the full-stack call path of distributed links through flame graphs, which can help developers, system operators, and cloud operators quickly identify performance bottlenecks and errors in calls.
 
-**Note: A part of [KhulnaSoft](https://khulnasoft.yunshan.net/community.html), can only work with KhulnaSoft datasource and use the `Distributed Tracing - Flame` app type.**
+can only work with KhulnaSoft datasource and use the `Distributed Tracing - Flame` app type.**
 
 ![KhulnaSoft Tracing](https://raw.githubusercontent.com/khulnasoft/khulnasoft-gui-grafana/main/khulnasoft-apptracing-panel/src/img/screenshot.jpg)
 
