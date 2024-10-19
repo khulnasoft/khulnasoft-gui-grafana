@@ -1,4 +1,2 @@
-node_modules
-coverage
-# dist
-khulnasoft-querier-datasource/src/dashboards
+*/node_modules
+*/coverage
