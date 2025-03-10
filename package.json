@@ -23,6 +23,15 @@
     "sign:all": "yarn sign:tracing && yarn sign:querier && yarn sign:topo",
     "sign:querier": "cd khulnasoft-querier-datasource && yarn sign",
     "sign:topo": "cd khulnasoft-topo-panel && yarn sign",
-    "sign:tracing": "cd khulnasoft-apptracing-panel && yarn sign"
+    "sign:all": "yarn sign:tracing && yarn sign:querier && yarn sign:topo"
+  },
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "copy-text-to-clipboard": "^3.2.0",
+    "khulnasoft-vis-js": "^0.0.15"
+  },
+  "devDependencies": {
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4"
   }
 }
